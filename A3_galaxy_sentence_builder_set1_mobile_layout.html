@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>A3 Galaxy Sentence Builder – Set 1</title>
+<style>
+  :root{
+    --bg1:#020617;
+    --bg2:#0f172a;
+    --panel:rgba(3,10,26,.78);
+    --panel-strong:rgba(4,12,32,.92);
+    --line:#1e3a8a;
+    --cyan:#22d3ee;
+    --cyan2:#67e8f9;
+    --blue:#60a5fa;
+    --violet:#8b5cf6;
+    --pink:#ec4899;
+    --green:#22c55e;
+    --yellow:#facc15;
+    --red:#fb7185;
+    --white:#e6f7ff;
+    --muted:#8fb9da;
+    --shadow:0 18px 60px rgba(0,0,0,.38);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;min-height:100%;font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;background:
+      radial-gradient(circle at 15% 20%, rgba(34,211,238,.16), transparent 24%),
+      radial-gradient(circle at 82% 22%, rgba(139,92,246,.16), transparent 28%),
+      radial-gradient(circle at 72% 74%, rgba(236,72,153,.14), transparent 28%),
+      linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--white);overflow-x:hidden}
+  body::before, body::after{content:"";position:fixed;inset:-20%;pointer-events:none;z-index:0}
+  body::before{background-image:
+      radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.9), transparent 60%),
+      radial-gradient(1.5px 1.5px at 60% 20%, rgba(255,255,255,.7), transparent 60%),
+      radial-gradient(2px 2px at 80% 70%, rgba(255,255,255,.8), transparent 60%),
+      radial-gradient(1.5px 1.5px at 35% 75%, rgba(255,255,255,.8), transparent 60%),
+      radial-gradient(2px 2px at 10% 80%, rgba(255,255,255,.6), transparent 60%);
+      animation:starDrift 24s linear infinite;
+      opacity:.75}
+  body::after{background:
+      radial-gradient(circle at 20% 65%, rgba(34,211,238,.1), transparent 18%),
+      radial-gradient(circle at 78% 35%, rgba(96,165,250,.1), transparent 24%);
+      filter:blur(20px)}
+  @keyframes starDrift{from{transform:translateY(0)}to{transform:translateY(40px)}}
+  .planet{position:fixed;border-radius:50%;pointer-events:none;z-index:0;opacity:.9}
+  .planet.one{width:min(24vw,280px);height:min(24vw,280px);right:-70px;top:40px;background:radial-gradient(circle at 30% 30%, #8be9ff, #2563eb 52%, #091938 74%);box-shadow:0 0 60px rgba(34,211,238,.22);animation:floatP1 15s ease-in-out infinite}
+  .planet.two{width:min(15vw,170px);height:min(15vw,170px);left:-30px;bottom:90px;background:radial-gradient(circle at 35% 35%, #ffd6f2, #9333ea 55%, #25063a 78%);box-shadow:0 0 50px rgba(236,72,153,.18);animation:floatP2 18s ease-in-out infinite}
+  .planet.ring::after{content:"";position:absolute;inset:43% -18%;border:6px solid rgba(255,255,255,.35);border-radius:50%;transform:rotate(-18deg)}
+  @keyframes floatP1{0%,100%{transform:translateY(0)}50%{transform:translateY(18px)}}
+  @keyframes floatP2{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+
+  .screen{display:none;position:relative;min-height:100vh;z-index:1;padding:18px}
+  .screen.active{display:flex;align-items:center;justify-content:center}
+  .shell{width:min(1400px,100%)}
+  .panel{background:linear-gradient(180deg, rgba(9,20,47,.88), rgba(2,6,23,.92));border:1px solid rgba(103,232,249,.26);border-radius:34px;box-shadow:var(--shadow), inset 0 0 0 1px rgba(255,255,255,.04);backdrop-filter:blur(14px);padding:22px;position:relative;overflow:hidden}
+  .panel::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg, transparent 0 32%, rgba(255,255,255,.08) 50%, transparent 68%);transform:translateX(-120%);animation:shine 9s linear infinite;pointer-events:none}
+  @keyframes shine{to{transform:translateX(120%)}}
+
+  .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:center}
+  .badge{display:inline-flex;gap:10px;align-items:center;padding:10px 16px;border-radius:999px;background:rgba(8,31,56,.82);border:1px solid rgba(103,232,249,.34);color:var(--cyan2);font-weight:900;letter-spacing:.4px;box-shadow:0 0 18px rgba(34,211,238,.15)}
+  h1{margin:.4rem 0 .7rem;font-size:clamp(2rem,4.6vw,4.5rem);line-height:.98;text-shadow:0 0 18px rgba(34,211,238,.18)}
+  .hero p{font-size:clamp(1rem,1.8vw,1.25rem);line-height:1.72;color:#d4efff;max-width:780px;margin:.3rem 0}
+  .accent{color:var(--cyan2)}
+  .accent2{color:#f0abfc}
+  .hero-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .mini{background:linear-gradient(180deg, rgba(9,30,56,.9), rgba(7,18,39,.9));border:1px solid rgba(103,232,249,.24);border-radius:24px;padding:18px;min-height:130px;box-shadow:inset 0 0 18px rgba(34,211,238,.06)}
+  .mini .icon{font-size:2rem;display:block;margin-bottom:10px}
+  .mini strong{display:block;font-size:1.05rem;margin-bottom:8px}
+  .mini span{color:var(--muted);line-height:1.55}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  input[type="text"]{flex:1;min-width:240px;background:rgba(6,19,42,.95);border:1px solid rgba(103,232,249,.28);color:var(--white);padding:16px 18px;border-radius:18px;font-size:1.05rem;font-weight:800;box-shadow:inset 0 0 16px rgba(34,211,238,.05)}
+  input::placeholder{color:#9cc6df}
+  .btn{border:none;border-radius:18px;padding:14px 20px;font-weight:900;font-size:1rem;cursor:pointer;color:#09111c;transition:transform .14s ease, box-shadow .14s ease, filter .14s ease;box-shadow:0 10px 22px rgba(0,0,0,.25)}
+  .btn:hover{transform:translateY(-2px)}
+  .btn:active{transform:scale(.98)}
+  .btn-cyan{background:linear-gradient(180deg,var(--cyan2),var(--cyan));box-shadow:0 0 24px rgba(34,211,238,.28),0 10px 22px rgba(0,0,0,.25)}
+  .btn-violet{background:linear-gradient(180deg,#c084fc,var(--violet));color:#fff}
+  .btn-green{background:linear-gradient(180deg,#86efac,var(--green))}
+  .btn-red{background:linear-gradient(180deg,#fda4af,var(--red))}
+  .btn-ghost{background:rgba(10,23,48,.86);color:var(--white);border:1px solid rgba(103,232,249,.24)}
+  .btn-yellow{background:linear-gradient(180deg,#fde68a,var(--yellow))}
+
+  .section-title{font-size:clamp(1.5rem,3vw,2.35rem);margin:.2rem 0 .7rem;color:var(--cyan2)}
+  .guide-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px}
+  .guide{background:linear-gradient(180deg, rgba(7,20,42,.96), rgba(3,10,24,.94));padding:18px;border-radius:24px;border:1px solid rgba(103,232,249,.18);line-height:1.7;color:#d8f3ff}
+  .guide b{color:#fff}
+
+  .top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .hud{display:flex;gap:10px;flex-wrap:wrap}
+  .pill{padding:10px 14px;border-radius:999px;background:rgba(5,18,39,.88);border:1px solid rgba(103,232,249,.22);color:#cff5ff;font-weight:900;box-shadow:0 0 14px rgba(34,211,238,.1)}
+  .mission-flow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .mission-node{padding:9px 13px;border-radius:999px;background:rgba(5,18,39,.82);border:1px solid rgba(255,255,255,.08);font-weight:900;color:#a9d6ef}
+  .mission-node.done{border-color:rgba(34,197,94,.42);color:#d1fae5;background:rgba(6,42,23,.9)}
+  .mission-node.active{border-color:rgba(34,211,238,.44);color:#ecfeff;box-shadow:0 0 18px rgba(34,211,238,.22)}
+  .mission-node.locked{opacity:.65}
+
+  .status-board{background:linear-gradient(180deg, rgba(7,18,38,.96), rgba(2,8,22,.96));border:1px solid rgba(103,232,249,.18);border-radius:28px;padding:18px;overflow:hidden}
+  .progress-wrap{margin-bottom:14px}
+  .progress-label{display:flex;justify-content:space-between;gap:12px;font-weight:900;color:#d9f8ff;margin-bottom:8px}
+  .progress-track{height:18px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;box-shadow:inset 0 0 10px rgba(0,0,0,.35)}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#22d3ee,#60a5fa,#8b5cf6);box-shadow:0 0 20px rgba(34,211,238,.35);transition:width .35s ease}
+  .combo-track{height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+  .combo-fill{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#facc15,#fb7185);box-shadow:0 0 16px rgba(250,204,21,.24);transition:width .3s ease}
+  .status-text{margin-top:8px;font-weight:900;color:#ffd7fb;letter-spacing:.5px;min-height:24px}
+
+  .arena{margin-top:14px;display:grid;grid-template-columns:1.2fr .8fr;gap:16px;align-items:stretch}
+  .sentence-card,.reactor-card{background:linear-gradient(180deg, rgba(7,18,38,.96), rgba(2,8,22,.96));border:1px solid rgba(103,232,249,.16);border-radius:28px;padding:18px;position:relative;overflow:hidden;min-height:460px}
+  .sentence-card::after,.reactor-card::after{content:"";position:absolute;inset:auto -20% -60% auto;width:320px;height:320px;background:radial-gradient(circle, rgba(34,211,238,.10), transparent 58%);pointer-events:none}
+  .card-title{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .card-title h2{margin:0;font-size:clamp(1.2rem,2.4vw,2rem)}
+  .small-note{color:var(--muted);font-weight:800}
+  .sentence-area{min-height:180px;display:flex;align-items:center;justify-content:center;padding:10px 8px;text-align:center}
+  .sentence-line{font-size:clamp(1.5rem,3vw,3rem);line-height:1.5;font-weight:1000;letter-spacing:.4px}
+  .slot{display:inline-flex;align-items:center;justify-content:center;min-width:180px;padding:8px 16px;margin:0 8px;border-radius:18px;border:2px solid rgba(34,211,238,.42);background:rgba(6,26,44,.88);color:var(--cyan2);box-shadow:0 0 20px rgba(34,211,238,.14), inset 0 0 16px rgba(34,211,238,.06);position:relative;vertical-align:middle;min-height:66px}
+  .slot.empty{color:#83bed6}
+  .slot.accepted{animation:slotPulse .7s ease}
+  @keyframes slotPulse{0%{transform:scale(.9);box-shadow:0 0 0 rgba(34,211,238,0)}50%{transform:scale(1.06);box-shadow:0 0 28px rgba(34,211,238,.35)}100%{transform:scale(1)}}
+  .instruction-box{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
+  .instruction{padding:12px 14px;border-radius:18px;background:rgba(8,30,56,.78);border:1px solid rgba(103,232,249,.15);font-weight:800;color:#d9f2ff;line-height:1.6}
+  .feedback{min-height:66px;margin-top:14px;border-radius:18px;padding:14px;background:rgba(5,19,40,.72);border:1px solid rgba(103,232,249,.15);font-weight:900;line-height:1.6;color:#fff}
+
+  .orb-zone{position:relative;min-height:290px;border-radius:24px;background:radial-gradient(circle at 50% 50%, rgba(34,211,238,.08), transparent 55%), linear-gradient(180deg, rgba(10,27,51,.88), rgba(4,10,23,.94));border:1px solid rgba(103,232,249,.15);overflow:hidden}
+  .orb-zone::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(255,255,255,.03), transparent 25%, transparent 75%, rgba(255,255,255,.03));pointer-events:none}
+  .orb{position:absolute;width:clamp(116px,13vw,170px);height:clamp(116px,13vw,170px);border-radius:50%;display:grid;place-items:center;text-align:center;padding:14px;font-size:clamp(1.15rem,1.8vw,1.8rem);font-weight:1000;color:#fff;background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.96), rgba(103,232,249,.75) 12%, rgba(34,211,238,.38) 28%, rgba(14,165,233,.36) 55%, rgba(8,47,73,.92) 76%);border:2px solid rgba(103,232,249,.85);box-shadow:0 0 30px rgba(34,211,238,.24), inset 0 0 22px rgba(255,255,255,.2);user-select:none;pointer-events:none;transform:translate(-50%,-50%)}
+  .orb::after{content:"";position:absolute;inset:8%;border-radius:50%;border:1px solid rgba(255,255,255,.16)}
+  .orb.warn{border-color:rgba(250,204,21,.8);box-shadow:0 0 32px rgba(250,204,21,.24), inset 0 0 22px rgba(255,255,255,.18)}
+  .orb.good{border-color:rgba(34,197,94,.8);box-shadow:0 0 38px rgba(34,197,94,.3), inset 0 0 20px rgba(255,255,255,.16)}
+  .orb.bad{border-color:rgba(251,113,133,.82);box-shadow:0 0 38px rgba(251,113,133,.28), inset 0 0 20px rgba(255,255,255,.16)}
+  .orb.destroying{animation:explode .55s ease forwards}
+  .orb.accepting{animation:acceptFly .6s ease forwards}
+  @keyframes explode{0%{transform:translate(-50%,-50%) scale(1);opacity:1}45%{transform:translate(-50%,-50%) scale(1.18)}100%{transform:translate(-50%,-50%) scale(1.75);opacity:0;filter:blur(5px)}}
+  @keyframes acceptFly{0%{transform:translate(-50%,-50%) scale(1)}70%{opacity:1}100%{transform:translate(var(--dx), var(--dy)) scale(.35);opacity:0;filter:blur(2px)}}
+
+  .reactor-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .reactor-actions .btn{padding:16px 18px;font-size:1.05rem}
+  .legend{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+  .chip{padding:10px 12px;border-radius:999px;background:rgba(8,30,56,.76);border:1px solid rgba(255,255,255,.08);font-weight:900;color:#d8f6ff}
+
+  .sum-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:16px}
+  .sum-card{background:linear-gradient(180deg, rgba(7,18,38,.96), rgba(2,8,22,.96));border:1px solid rgba(103,232,249,.16);border-radius:26px;padding:18px}
+  .score-big{font-size:clamp(2rem,5vw,4.4rem);font-weight:1000;color:#fff;text-shadow:0 0 24px rgba(34,211,238,.28);margin:6px 0}
+  .rating{display:inline-flex;padding:10px 16px;border-radius:999px;background:rgba(8,30,56,.9);border:1px solid rgba(103,232,249,.28);font-weight:900;color:#d8fbff}
+  table{width:100%;border-collapse:collapse;border-radius:18px;overflow:hidden;background:rgba(7,18,38,.72)}
+  th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;font-size:.95rem}
+  th{background:rgba(13,34,60,.95);color:#c9f6ff}
+  .review-box{max-height:48vh;overflow:auto;border-radius:18px;border:1px solid rgba(103,232,249,.15)}
+  .center{text-align:center}
+
+  .overlay{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;z-index:15}
+  .overlay span{font-size:min(24vw,180px);opacity:0;transform:scale(.25)}
+  .overlay.show span{animation:emojiBurst .95s ease forwards}
+  @keyframes emojiBurst{0%{opacity:0;transform:scale(.25)}25%{opacity:1;transform:scale(1.14)}100%{opacity:0;transform:scale(.95) translateY(-18px)}}
+
+  .footer-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+
+  @media (max-width: 980px){
+    .hero,.arena,.sum-grid{grid-template-columns:1fr}
+    .guide-grid,.instruction-box{grid-template-columns:1fr}
+    .sentence-card,.reactor-card{min-height:auto}
+  }
+  @media (max-width: 640px){
+    .screen{padding:10px}
+    .shell{padding:0}
+    .panel{padding:14px}
+    .badge{font-size:.78rem;padding:8px 10px}
+    .mission-flow{gap:8px}
+    .mission-node{padding:8px 10px;font-size:.8rem}
+    .status-board{padding:12px}
+    .arena{margin-top:10px;gap:10px}
+    .sentence-card,.reactor-card{padding:14px;border-radius:22px}
+    .sentence-card{position:sticky;top:8px;z-index:4;backdrop-filter:blur(6px)}
+    .card-title{margin-bottom:4px}
+    .card-title h2{font-size:1.05rem}
+    .small-note{font-size:.84rem}
+    .sentence-area{min-height:118px;padding:2px 0 4px}
+    .sentence-line{font-size:clamp(1.18rem,5.8vw,1.9rem);line-height:1.42}
+    .slot{min-width:118px;min-height:52px;padding:6px 12px;margin:0 5px;border-radius:16px}
+    .instruction-box{display:none}
+    .feedback{margin-top:8px;min-height:46px;padding:10px 12px;font-size:.94rem;line-height:1.45}
+    .orb-zone{min-height:220px}
+    .orb{width:118px;height:118px;font-size:1.45rem}
+    .reactor-actions{position:sticky;bottom:8px;z-index:3;background:linear-gradient(180deg, rgba(2,8,22,0), rgba(2,8,22,.88) 24%, rgba(2,8,22,.98));padding-top:10px;margin-top:10px}
+    .reactor-actions .btn{padding:14px 10px;font-size:.95rem}
+    .legend{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="planet one ring"></div>
+<div class="planet two"></div>
+<div class="overlay" id="overlay"><span id="overlayIcon">🚀</span></div>
+
+<section class="screen active" id="screenStart">
+  <div class="shell">
+    <div class="panel">
+      <div class="hero">
+        <div>
+          <div class="badge">🌌 A3 MISSION • GALAXY WORD INSERTION • 30 SIGNALS</div>
+          <h1>Neural Sentence <span class="accent">Builder</span><br><span class="accent2">Galaxy Ball Set 1</span></h1>
+          <p>เกมนี้คือด่าน <b>A3</b> สำหรับฝึก <b>ใช้คำศัพท์ให้ถูกต้องในประโยค</b> ✨ เมื่อคำศัพท์ลอยสะบัดมา ให้กด <b>ACCEPT</b> ถ้าคำนั้นใช่ หรือกด <b>DESTROY</b> ถ้าคิดว่าไม่ใช่ แล้วดูคำพุ่งเข้าไปในประโยคอย่างเท่ ๆ 🚀</p>
+          <p>แนวเกมนี้ต่างจาก tense โดยตรงนะ — มันคือ <b>Vocabulary Usage</b> ใช้เพื่อให้เด็กจับความหมายของคำและเลือกคำให้เข้ากับบริบทจริง 🧠</p>
+          <div class="row" style="margin-top:16px">
+            <input type="text" id="playerName" placeholder="พิมพ์ชื่อผู้เล่นตรงนี้จ้า" />
+            <button class="btn btn-violet" id="btnHow">วิธีเล่น</button>
+            <button class="btn btn-cyan" id="btnStart">เริ่มภารกิจ</button>
+          </div>
+        </div>
+        <div class="hero-cards">
+          <div class="mini"><span class="icon">🧠</span><strong>เลือกจากความหมาย</strong><span>ไม่ใช่เกม tense แต่เป็นการเลือกคำศัพท์ให้ตรงกับประโยค</span></div>
+          <div class="mini"><span class="icon">⚡</span><strong>ลูกบอลพลังงาน</strong><span>คำวิ่งแบบ physics จริง สะบัดไปมา เร้าใจมากบนจอใหญ่</span></div>
+          <div class="mini"><span class="icon">✅</span><strong>Accept / Destroy</strong><span>กดยอมรับให้คำพุ่งเข้าช่อง หรือทำลายคำที่ไม่ใช่</span></div>
+          <div class="mini"><span class="icon">📈</span><strong>Progress + Combo</strong><span>มี progress bar, mission flow และ combo mode ครบ</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screenHow">
+  <div class="shell">
+    <div class="panel">
+      <div class="section-title">🚀 วิธีเล่น A3 – Neural Sentence Builder</div>
+      <div class="guide-grid">
+        <div class="guide"><b>1)</b> อ่านประโยคบนหน้าจอ แล้วดูช่องว่างที่รอคำตอบอยู่ตรงกลาง</div>
+        <div class="guide"><b>2)</b> ลูกบอลคำศัพท์จะลอยสะบัดเข้ามา <b>ทีละคำ</b> ให้ตัดสินใจอย่างไว</div>
+        <div class="guide"><b>3)</b> ถ้าคำนั้นเหมาะกับประโยค กด <b>✅ ACCEPT</b> คำจะพุ่งเข้าช่องอย่างสวยงาม</div>
+        <div class="guide"><b>4)</b> ถ้าคำนั้นไม่ใช่ กด <b>💥 DESTROY</b> คำจะระเบิดหายไป แล้วคำใหม่จะมาแทน</div>
+        <div class="guide"><b>5)</b> ถ้าเลือกถูกข้อแรก ได้คะแนนเต็มกว่า ถ้ากดผิดหลายครั้ง คะแนนจะลดลงเล็กน้อย</div>
+        <div class="guide"><b>6)</b> จบเกมมีสรุปผล + เฉลยทุกข้อ พร้อมดูว่าเด็กสับสนคำไหนบ้าง</div>
+      </div>
+      <div class="footer-actions">
+        <button class="btn btn-ghost" id="btnBackHome">กลับหน้าแรก</button>
+        <button class="btn btn-cyan" id="btnStart2">เริ่มเลย</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screenGame">
+  <div class="shell">
+    <div class="panel">
+      <div class="top">
+        <div class="hud">
+          <div class="pill" id="hudName">👤 Player: -</div>
+          <div class="pill" id="hudRound">🛰️ Signal 1 / 30</div>
+          <div class="pill" id="hudScore">⭐ Score: 0 / 90</div>
+          <div class="pill" id="hudLives">🧩 Tokens: 3</div>
+        </div>
+        <div class="row">
+          <button class="btn btn-ghost" id="btnFullscreen">Fullscreen</button>
+          <button class="btn btn-ghost" id="btnHomeGame">หน้าแรก</button>
+        </div>
+      </div>
+
+      <div class="mission-flow">
+        <div class="mission-node done">A1 Review ✅</div>
+        <div class="mission-node active">A2 Sound Clash ✅ / A3 Running 🔄</div>
+        <div class="mission-node locked">A3 Complete 🔒</div>
+      </div>
+
+      <div class="status-board">
+        <div class="progress-wrap">
+          <div class="progress-label"><span>🌌 Mission Progress</span><span id="progressText">0%</span></div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>⚡ Combo Reactor</span><span id="comboText">0</span></div>
+          <div class="combo-track"><div class="combo-fill" id="comboFill"></div></div>
+        </div>
+        <div class="status-text" id="statusText">SYSTEM READY</div>
+      </div>
+      <div class="chip" style="margin-top:10px;display:inline-flex">📱 Mobile layout: ประโยคกับลูกบอลถูกดึงให้ชิดกันแล้ว</div>
+
+      <div class="arena">
+        <div class="sentence-card">
+          <div class="card-title">
+            <h2>🧠 Sentence Core</h2>
+            <div class="small-note">อ่านบริบท แล้วเลือกคำให้ถูก</div>
+          </div>
+          <div class="sentence-area">
+            <div class="sentence-line" id="sentenceLine"></div>
+          </div>
+          <div class="instruction-box">
+            <div class="instruction">✅ <b>ACCEPT</b> = ใช้คำนั้น แล้วคำจะพุ่งเข้า slot</div>
+            <div class="instruction">💥 <b>DESTROY</b> = คำไม่เหมาะกับประโยค ให้ทำลายทิ้ง</div>
+          </div>
+          <div class="feedback" id="feedbackBox">รอสัญญาณคำศัพท์คำแรกจาก Galaxy Reactor...</div>
+        </div>
+
+        <div class="reactor-card">
+          <div class="card-title">
+            <h2>⚛️ Word Reactor</h2>
+            <div class="small-note">คำที่ลอยมาอาจใช่ หรืออาจเป็นตัวหลอก</div>
+          </div>
+          <div class="orb-zone" id="orbZone"></div>
+          <div class="reactor-actions">
+            <button class="btn btn-green" id="btnAccept">✅ ACCEPT</button>
+            <button class="btn btn-red" id="btnDestroy">💥 DESTROY</button>
+          </div>
+          <div class="legend">
+            <div class="chip">🎯 เลือกให้ถูกตั้งแต่ครั้งแรก = คะแนนเยอะกว่า</div>
+            <div class="chip">🚀 ถูกติดกัน 5 = POWER MODE</div>
+            <div class="chip">🌠 ถูกติดกัน 10 = HYPER MODE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screenSummary">
+  <div class="shell">
+    <div class="panel">
+      <div class="badge">🌌 MISSION COMPLETE</div>
+      <h1 style="font-size:clamp(2rem,4vw,3.7rem)">Galaxy Sentence Report</h1>
+      <div class="sum-grid">
+        <div class="sum-card center">
+          <div style="color:var(--muted);font-weight:900">ผู้เล่น</div>
+          <div class="score-big" id="sumName">-</div>
+          <div class="rating" id="sumRating">Sharp Word Pilot</div>
+          <div class="score-big" id="sumScore">0 / 90</div>
+          <div id="sumComment" style="color:#d8f3ff;line-height:1.7;font-weight:800">กำลังประเมิน...</div>
+        </div>
+        <div class="sum-card">
+          <table>
+            <tr><th>สถิติ</th><th class="center">ผลลัพธ์</th></tr>
+            <tr><td>ตอบถูก</td><td class="center" id="statCorrect">0</td></tr>
+            <tr><td>ตอบผิด</td><td class="center" id="statWrong">0</td></tr>
+            <tr><td>ข้ามคำหลอกได้</td><td class="center" id="statDestroy">0</td></tr>
+            <tr><td>คอมโบสูงสุด</td><td class="center" id="statCombo">0</td></tr>
+            <tr><td>คะแนนเฉลี่ย/ข้อ</td><td class="center" id="statAvg">0</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="footer-actions">
+        <button class="btn btn-violet" id="btnToggleReview">ดูเฉลย</button>
+        <button class="btn btn-cyan" id="btnReplay">เล่นอีกครั้ง</button>
+      </div>
+      <div id="reviewWrap" style="display:none;margin-top:16px">
+        <div class="sum-card">
+          <div class="section-title" style="font-size:1.45rem">📘 Review Log</div>
+          <div class="review-box">
+            <table id="reviewTable">
+              <thead>
+                <tr><th>#</th><th>ประโยค</th><th>คำตอบ</th><th>สิ่งที่ผู้เล่นทำ</th><th>คะแนน</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+const bank = [
+  { sentence:["I "," coffee every day."], answer:"drink", distractors:["eat","sleep","paint"], hint:"ใช้คำที่ตรงกับการดื่มกาแฟ" },
+  { sentence:["She "," a book before bed."], answer:"reads", distractors:["eats","drives","jumps"], hint:"ใช้คำที่เกี่ยวกับหนังสือ" },
+  { sentence:["We "," soccer after school."], answer:"play", distractors:["cook","draw","wash"], hint:"ใช้คำที่เข้ากับกีฬา" },
+  { sentence:["The baby "," loudly at night."], answer:"cries", distractors:["drinks","writes","opens"], hint:"เสียงของเด็กตอนร้องไห้" },
+  { sentence:["My father "," to work by car."], answer:"drives", distractors:["sings","reads","swims"], hint:"ใช้คำที่เข้ากับรถ" },
+  { sentence:["They "," dinner in the kitchen."], answer:"cook", distractors:["climb","dance","throw"], hint:"ทำอาหาร" },
+  { sentence:["The bird "," in the blue sky."], answer:"flies", distractors:["cuts","bakes","cleans"], hint:"สิ่งที่นกทำบนท้องฟ้า" },
+  { sentence:["He "," his hands before lunch."], answer:"washes", distractors:["plays","counts","draws"], hint:"ทำก่อนกินข้าว" },
+  { sentence:["We "," English in class."], answer:"study", distractors:["sleep","build","kick"], hint:"ทำในห้องเรียน" },
+  { sentence:["The cat "," on the sofa."], answer:"sleeps", distractors:["cooks","reads","drinks"], hint:"แมวมักทำบนโซฟา" },
+  { sentence:["I "," my homework after school."], answer:"do", distractors:["fly","cook","throw"], hint:"ทำการบ้าน" },
+  { sentence:["Mom "," the window every morning."], answer:"opens", distractors:["eats","throws","claps"], hint:"ทำให้หน้าต่างเปิด" },
+  { sentence:["The students "," questions in the lesson."], answer:"answer", distractors:["sleep","paint","drive"], hint:"ตอบคำถาม" },
+  { sentence:["My brother "," a picture of a robot."], answer:"draws", distractors:["drinks","carries","washes"], hint:"สร้างภาพด้วยดินสอ" },
+  { sentence:["We "," to music on the bus."], answer:"listen", distractors:["read","cook","open"], hint:"ทำกับดนตรี" },
+  { sentence:["The teacher "," the lesson clearly."], answer:"explains", distractors:["swims","jumps","closes"], hint:"อธิบายบทเรียน" },
+  { sentence:["I "," my shoes before running."], answer:"tie", distractors:["drink","write","sing"], hint:"ผูกเชือกรองเท้า" },
+  { sentence:["The dog "," the ball fast."], answer:"chases", distractors:["reads","sleeps","cooks"], hint:"ไล่ตามลูกบอล" },
+  { sentence:["She "," her lunch to school."], answer:"brings", distractors:["opens","draws","jumps"], hint:"เอามาด้วย" },
+  { sentence:["We "," the plants in the evening."], answer:"water", distractors:["listen","throw","paint"], hint:"รดน้ำต้นไม้" },
+  { sentence:["The boy "," his bike in the park."], answer:"rides", distractors:["reads","washes","ties"], hint:"ใช้กับจักรยาน" },
+  { sentence:["I "," the answer on the board."], answer:"write", distractors:["cook","carry","sleep"], hint:"เขียนคำตอบ" },
+  { sentence:["The girls "," happily on the stage."], answer:"dance", distractors:["study","drive","wash"], hint:"สิ่งที่ทำบนเวที" },
+  { sentence:["He "," the heavy box carefully."], answer:"carries", distractors:["flies","sings","opens"], hint:"ยกหรือถือของหนัก" },
+  { sentence:["We "," our classroom every Friday."], answer:"clean", distractors:["ride","drink","read"], hint:"ทำให้สะอาด" },
+  { sentence:["The chef "," bread in the oven."], answer:"bakes", distractors:["answers","ties","paints"], hint:"อบในเตา" },
+  { sentence:["My sister "," a song in the shower."], answer:"sings", distractors:["opens","waters","drives"], hint:"ร้องเพลง" },
+  { sentence:["The children "," the stars at night."], answer:"watch", distractors:["cook","wash","ride"], hint:"มองดูดาว" },
+  { sentence:["I "," a gift for my friend."], answer:"wrap", distractors:["drink","sleep","chase"], hint:"ห่อของขวัญ" },
+  { sentence:["Grandpa "," stories after dinner."], answer:"tells", distractors:["flies","cleans","plays"], hint:"เล่าเรื่อง" }
+];
+
+const el = id => document.getElementById(id);
+const screens = ["screenStart","screenHow","screenGame","screenSummary"];
+const state = {
+  player:"",
+  order:[],
+  index:0,
+  score:0,
+  correct:0,
+  wrong:0,
+  destroyed:0,
+  combo:0,
+  maxCombo:0,
+  tries:0,
+  current:null,
+  currentOrb:null,
+  orbX:150,
+  orbY:130,
+  vx:2.6,
+  vy:2.2,
+  raf:null,
+  results:[],
+  roundPool:[],
+  currentExpected:""
+};
+
+function showScreen(id){ screens.forEach(s=>el(s).classList.remove('active')); el(id).classList.add('active'); }
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
+
+let audioCtx;
+function ensureAudio(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }
+function tone(freq=440, dur=.08, type='sine', vol=.03){ ensureAudio(); if(!audioCtx) return; const osc=audioCtx.createOscillator(); const gain=audioCtx.createGain(); osc.type=type; osc.frequency.value=freq; gain.gain.value=vol; osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); gain.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime+dur); osc.stop(audioCtx.currentTime+dur); }
+function successSfx(){ tone(700,.06,'triangle',.04); setTimeout(()=>tone(980,.08,'triangle',.045),70); setTimeout(()=>tone(1280,.1,'triangle',.05),150); }
+function failSfx(){ tone(220,.09,'sawtooth',.04); setTimeout(()=>tone(160,.16,'sawtooth',.035),90); }
+function clickSfx(){ tone(600,.04,'square',.02); }
+function powerSfx(){ tone(520,.06,'square',.03); setTimeout(()=>tone(740,.06,'square',.03),50); setTimeout(()=>tone(980,.08,'square',.03),100); }
+
+function showOverlay(icon){ const wrap=el('overlay'); const span=el('overlayIcon'); span.textContent=icon; wrap.classList.remove('show'); void wrap.offsetWidth; wrap.classList.add('show'); }
+
+function updateHud(){
+  el('hudName').textContent = `👤 Player: ${state.player || '-'}`;
+  el('hudRound').textContent = `🛰️ Signal ${state.index+1} / ${state.order.length}`;
+  el('hudScore').textContent = `⭐ Score: ${state.score} / ${state.order.length*3}`;
+  el('hudLives').textContent = `🧩 Tokens: ${Math.max(0,3-state.tries)}`;
+  const progress = ((state.index)/state.order.length)*100;
+  el('progressFill').style.width = `${progress}%`;
+  el('progressText').textContent = `${Math.round(progress)}%`;
+  const comboPercent = clamp((state.combo/10)*100,0,100);
+  el('comboFill').style.width = `${comboPercent}%`;
+  el('comboText').textContent = state.combo;
+}
+
+function setStatus(text){ el('statusText').textContent = text; }
+function setFeedback(html){ el('feedbackBox').innerHTML = html; }
+
+function buildSentenceHTML(item, inserted=''){
+  const slotClass = inserted ? 'slot accepted' : 'slot empty';
+  const slotText = inserted || '______';
+  return `${item.sentence[0]}<span class="${slotClass}" id="answerSlot">${slotText}</span>${item.sentence[1]}`;
+}
+
+function startGame(){
+  ensureAudio();
+  state.player = el('playerName').value.trim() || 'Galaxy Pilot';
+  state.order = shuffle(bank);
+  state.index = 0; state.score = 0; state.correct = 0; state.wrong = 0; state.destroyed = 0; state.combo = 0; state.maxCombo = 0; state.results = [];
+  showScreen('screenGame');
+  loadRound();
+}
+
+function loadRound(){
+  cancelAnimationFrame(state.raf);
+  const item = state.order[state.index];
+  state.current = item;
+  state.tries = 0;
+  state.roundPool = shuffle([item.answer, ...item.distractors]);
+  state.currentExpected = item.answer;
+  el('sentenceLine').innerHTML = buildSentenceHTML(item);
+  setFeedback(`Mission ${state.index+1}: <b>${item.hint}</b>`);
+  updateHud();
+  setStatus(state.index >= state.order.length*0.8 ? '⚡ ALMOST COMPLETE' : 'SYSTEM READY');
+  spawnNextOrb();
+}
+
+function spawnNextOrb(){
+  const zone = el('orbZone');
+  zone.innerHTML = '';
+  if(!state.roundPool.length){
+    // fallback if somehow all destroyed before answer found
+    state.roundPool = [state.current.answer];
+  }
+  const word = state.roundPool[0];
+  const orb = document.createElement('div');
+  orb.className = 'orb warn';
+  orb.textContent = word;
+  zone.appendChild(orb);
+  state.currentOrb = orb;
+  state.orbX = zone.clientWidth*0.35;
+  state.orbY = zone.clientHeight*0.45;
+  const speedBase = 2.2 + Math.min(state.index * 0.03, 1.1);
+  state.vx = (Math.random()>.5?1:-1) * (speedBase + Math.random()*1.2);
+  state.vy = (Math.random()>.5?1:-1) * (1.8 + Math.random()*1.1);
+  animateOrb();
+}
+
+function animateOrb(){
+  const zone = el('orbZone');
+  const orb = state.currentOrb;
+  if(!orb) return;
+  const step = ()=>{
+    const r = orb.offsetWidth/2;
+    state.orbX += state.vx;
+    state.orbY += state.vy;
+    if(state.orbX < r || state.orbX > zone.clientWidth-r){ state.vx *= -1; clickWall(); }
+    if(state.orbY < r || state.orbY > zone.clientHeight-r){ state.vy *= -1; clickWall(); }
+    state.orbX = clamp(state.orbX,r,zone.clientWidth-r);
+    state.orbY = clamp(state.orbY,r,zone.clientHeight-r);
+    orb.style.left = `${state.orbX}px`;
+    orb.style.top = `${state.orbY}px`;
+    state.raf = requestAnimationFrame(step);
+  };
+  cancelAnimationFrame(state.raf);
+  state.raf = requestAnimationFrame(step);
+}
+
+function clickWall(){ if(Math.random()>.94) tone(240,.025,'square',.006); }
+
+function handleAccept(){
+  if(!state.currentOrb) return;
+  ensureAudio();
+  const word = state.currentOrb.textContent;
+  state.tries++;
+  if(word === state.current.answer){
+    successSfx();
+    showOverlay('🚀');
+    const points = state.tries === 1 ? 3 : state.tries === 2 ? 2 : 1;
+    state.score += points;
+    state.correct++;
+    state.combo++;
+    state.maxCombo = Math.max(state.maxCombo, state.combo);
+    if(state.combo === 5){ setStatus('⚡ POWER MODE'); powerSfx(); }
+    else if(state.combo === 10){ setStatus('🌠 HYPER MODE'); powerSfx(); showOverlay('🌠'); }
+    else { setStatus('✅ SIGNAL LOCKED'); }
+    setFeedback(`ยอดเยี่ยม! คำว่า <b>${word}</b> เข้ากับประโยคนี้พอดี ได้ <b>${points}</b> คะแนน`);
+    const slot = document.getElementById('answerSlot');
+    const orbRect = state.currentOrb.getBoundingClientRect();
+    const slotRect = slot.getBoundingClientRect();
+    const dx = (slotRect.left + slotRect.width/2) - (orbRect.left + orbRect.width/2);
+    const dy = (slotRect.top + slotRect.height/2) - (orbRect.top + orbRect.height/2);
+    state.currentOrb.classList.remove('warn');
+    state.currentOrb.classList.add('good','accepting');
+    state.currentOrb.style.setProperty('--dx', `${dx}px`);
+    state.currentOrb.style.setProperty('--dy', `${dy}px`);
+    cancelAnimationFrame(state.raf);
+    const chosenWord = word;
+    setTimeout(()=>{
+      el('sentenceLine').innerHTML = buildSentenceHTML(state.current, chosenWord);
+      pushResult(`ยอมรับ <b>${chosenWord}</b> ถูกต้อง`, points);
+      nextRound();
+    }, 620);
+  } else {
+    failSfx();
+    showOverlay('💥');
+    state.wrong++;
+    state.combo = 0;
+    setStatus('❌ WRONG SIGNAL');
+    setFeedback(`คำว่า <b>${word}</b> ยังไม่เข้ากับประโยคนี้ ลองทำลายหรือรอคำใหม่`);
+    removeCurrentOrb(true);
+  }
+  updateHud();
+}
+
+function handleDestroy(){
+  if(!state.currentOrb) return;
+  ensureAudio();
+  const word = state.currentOrb.textContent;
+  state.tries++;
+  if(word === state.current.answer){
+    failSfx();
+    showOverlay('😵');
+    state.wrong++;
+    state.combo = 0;
+    setStatus('🚨 CORE WORD DESTROYED');
+    setFeedback(`โอ๊ะ! คำว่า <b>${word}</b> คือคำตอบที่ถูก แต่ถูกทำลายไปแล้ว ระบบจะส่งกลับมาใหม่ในรอบถัดไป`);
+    // move answer to end so it returns later
+    state.roundPool.push(state.roundPool.shift());
+    removeCurrentOrb(true, true);
+  } else {
+    successSfx();
+    showOverlay('💥');
+    state.destroyed++;
+    state.combo++;
+    state.maxCombo = Math.max(state.maxCombo, state.combo);
+    if(state.combo === 5){ setStatus('⚡ POWER MODE'); powerSfx(); }
+    else if(state.combo === 10){ setStatus('🌠 HYPER MODE'); powerSfx(); showOverlay('🌠'); }
+    else { setStatus('🛡️ FAKE WORD DESTROYED'); }
+    setFeedback(`ดีมาก! <b>${word}</b> เป็นคำหลอก ถูกทำลายเรียบร้อย`);
+    state.roundPool.shift();
+    removeCurrentOrb(false);
+  }
+  updateHud();
+}
+
+function removeCurrentOrb(wrongAction=false, keepPool=false){
+  if(!state.currentOrb) return;
+  cancelAnimationFrame(state.raf);
+  state.currentOrb.classList.remove('warn');
+  state.currentOrb.classList.add(wrongAction ? 'bad' : 'good','destroying');
+  const oldOrb = state.currentOrb;
+  state.currentOrb = null;
+  if(!keepPool && state.roundPool.length && oldOrb.textContent === state.roundPool[0]){
+    state.roundPool.shift();
+  }
+  setTimeout(()=>{
+    oldOrb.remove();
+    spawnNextOrb();
+  }, 420);
+}
+
+function pushResult(action, points){
+  state.results.push({
+    no: state.index+1,
+    sentence: `${state.current.sentence[0]}______${state.current.sentence[1]}`,
+    answer: state.current.answer,
+    action,
+    points
+  });
+}
+
+function nextRound(){
+  state.index++;
+  updateHud();
+  const progress = ((state.index)/state.order.length)*100;
+  el('progressFill').style.width = `${progress}%`;
+  el('progressText').textContent = `${Math.round(progress)}%`;
+  if(state.index >= state.order.length){
+    showSummary();
+  } else {
+    setTimeout(loadRound, 260);
+  }
+}
+
+function getRating(){
+  const max = state.order.length*3;
+  if(state.score >= max*0.9) return ['🌌 Word Master','ยอดเยี่ยมมาก เลือกคำได้ตรงความหมายและบริบทแบบมืออาชีพ'];
+  if(state.score >= max*0.75) return ['🚀 Sharp Pilot','เก่งมาก จับคำได้แม่น และตัดคำหลอกได้ดี'];
+  if(state.score >= max*0.55) return ['⭐ Rising Explorer','ทำได้ดีแล้ว ฝึกเพิ่มอีกนิดจะคล่องขึ้นมาก'];
+  return ['🛠️ Training Mode','เริ่มต้นได้ดี ลองอ่านประโยคช้า ๆ แล้วเล่นซ้ำอีกครั้ง'];
+}
+
+function showSummary(){
+  cancelAnimationFrame(state.raf);
+  showScreen('screenSummary');
+  el('sumName').textContent = state.player;
+  const [rating, comment] = getRating();
+  el('sumRating').textContent = rating;
+  el('sumScore').textContent = `${state.score} / ${state.order.length*3}`;
+  el('sumComment').textContent = comment;
+  el('statCorrect').textContent = state.correct;
+  el('statWrong').textContent = state.wrong;
+  el('statDestroy').textContent = state.destroyed;
+  el('statCombo').textContent = state.maxCombo;
+  el('statAvg').textContent = (state.score/state.order.length).toFixed(1);
+  const tbody = el('reviewTable').querySelector('tbody');
+  tbody.innerHTML = '';
+  state.results.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.no}</td><td>${r.sentence}</td><td><b>${r.answer}</b></td><td>${r.action}</td><td class="center"><b>${r.points}</b></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleReview(){
+  const wrap = el('reviewWrap');
+  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+  el('btnToggleReview').textContent = wrap.style.display === 'none' ? 'ดูเฉลย' : 'ซ่อนเฉลย';
+}
+
+function goHome(){ cancelAnimationFrame(state.raf); showScreen('screenStart'); }
+function toggleFullscreen(){ if(!document.fullscreenElement){ document.documentElement.requestFullscreen?.(); } else { document.exitFullscreen?.(); } }
+
+el('btnHow').onclick = ()=>{ clickSfx(); showScreen('screenHow'); };
+el('btnBackHome').onclick = ()=>{ clickSfx(); showScreen('screenStart'); };
+el('btnStart').onclick = ()=>{ clickSfx(); startGame(); };
+el('btnStart2').onclick = ()=>{ clickSfx(); startGame(); };
+el('btnAccept').onclick = ()=>{ clickSfx(); handleAccept(); };
+el('btnDestroy').onclick = ()=>{ clickSfx(); handleDestroy(); };
+el('btnHomeGame').onclick = ()=>{ clickSfx(); goHome(); };
+el('btnReplay').onclick = ()=>{ clickSfx(); showScreen('screenStart'); };
+el('btnToggleReview').onclick = ()=>{ clickSfx(); toggleReview(); };
+el('btnFullscreen').onclick = ()=>{ clickSfx(); toggleFullscreen(); };
+document.body.addEventListener('pointerdown', ensureAudio, {once:false});
+window.addEventListener('resize', ()=>{ if(state.currentOrb) animateOrb(); });
+</script>
+</body>
+</html>
